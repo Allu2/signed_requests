@@ -39,4 +39,7 @@ Imports and make a key
     >>> key = jwk.JWK.generate(kty='oct', size=256)
 
 Form request that gets PoP Authorization header
-    >>> req = requests.get("http://localhost/", auth=SignedRequest(token="blaa", key=key))
+    >>> req = requests.Request("GET", "http://localhost/", auth=SignedRequest(token="blaa", key=key))
+    >>> req.prepare() # doctest: +ELLIPSIS
+    {'Authorization': 'PoP .eyJ...'}
+    <PreparedRequest [GET]>
