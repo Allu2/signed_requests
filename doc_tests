@@ -1,0 +1,28 @@
+The ``json_builder` module
+======================
+
+Using ``hash``
+-------------------
+
+First import
+``hash_params`` from the ``json_builder`` module:
+
+    >>> from json_builder import hash_params
+
+Create hash_params object:
+    >>> jsb = hash_params()
+
+Now use it with string:
+
+    >>> jsb.hash("b=bar&a=foo&c=duck")
+    'u4LgkGUWhP9MsKrEjA4dizIllDXluDku6ZqCeyuR-JY'
+
+Now use it with list:
+
+    >>> jsb.hash([["b","bar"],["a","foo"],["c","duck"]])
+    'u4LgkGUWhP9MsKrEjA4dizIllDXluDku6ZqCeyuR-JY'
+
+Now use it with list and dict:
+
+    >>> jsb.hash(["b", "a", "c"], {"a":"foo","c":"duck", "b":"bar"})
+    'u4LgkGUWhP9MsKrEjA4dizIllDXluDku6ZqCeyuR-JY'
