@@ -26,3 +26,17 @@ Now use it with list and dict:
 
     >>> jsb.hash(["b", "a", "c"], {"a":"foo","c":"duck", "b":"bar"})
     'u4LgkGUWhP9MsKrEjA4dizIllDXluDku6ZqCeyuR-JY'
+
+The ``signed_request_auth`` module
+======================
+
+Using ``SignedRequest``
+-------------------
+Imports and make a key
+    >>> import requests
+    >>> from signed_request_auth import SignedRequest
+    >>> from jwcrypto import jwk
+    >>> key = jwk.JWK.generate(kty='oct', size=256)
+
+Form request that gets PoP Authorization header
+    >>> req = requests.get("http://localhost/", auth=SignedRequest(token="blaa", key=key))

@@ -33,25 +33,26 @@ class SignedRequest(AuthBase):
     def generate_authorization_header(self):
         token = jws.JWS(dumps(self.json_structure).encode("utf-8"))
         token.add_signature(key=self.sign_key, alg=self.alg, header=self.header, protected=self.protected)
-        authorization_header = "PoP {}".format(token.serialize())
+        authorization_header = "PoP {}".format(token.serialize(compact=True))
         return authorization_header
 
     def __init__(self,
-                 token=None,
+                 token=None,  # Required
                  sign_method=False,
                  sign_url=False,
                  sign_path=False,
                  sign_query=False,
                  sign_header=False,
                  sign_body=False,
-                 key=None,
+                 key=None,  # Required
                  alg=None,
                  protected=None,
                  header=None):
+
         if alg is None:
             if protected is None and header is None:
-                header = {"typ": "JWS",
-                          "alg": "HS256"}
+                header = dumps({"typ": "JWS",
+                                "alg": "HS256"})
 
         self.sign_method = sign_method
         self.sign_url = sign_url
@@ -64,12 +65,13 @@ class SignedRequest(AuthBase):
         self.alg = alg
         self.header = header
         self.protected = protected
+
         if self.sign_key is None:
             raise TypeError("Key can't be type None.")
 
         self.json_structure = {
-            "at": token,
-            "ts": time.time()
+            "at": token,  # Required
+            "ts": time.time()  # Optional but Recommended.
         }
 
     def __call__(self, r):
