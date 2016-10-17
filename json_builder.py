@@ -53,20 +53,7 @@ class hash_params:
     def _hash_list(self, param_list):
         """
 
-        :param list: list as [["key", "value"], ["key2", "value2"]]
-        :return: byte array(octet stream) representation of hashed string
-        """
-        string = ""
-        for pair in param_list:
-            string += "{}={}&".format(precent_encode(pair[0]), precent_encode(pair[1]))
-        string = string.rstrip("&")
-        return self._hash_string(string)
-
-    def _hash_list_of_tuple(self,
-                            param_list):  # TODO: If this works as is we can just use the _hash_list for tuples as well.
-        """
-
-        :param list: list as [("key", "value"), ("key2", "value2")]
+        :param list: list as [["key", "value"], ["key2", "value2"]] or [("key", "value"), ("key2", "value2")]
         :return: byte array(octet stream) representation of hashed string
         """
         string = ""
@@ -95,10 +82,8 @@ class hash_params:
         :param hashable:
         """
         if isinstance(hashable, list) and dictionary is None:
-            if isinstance(hashable[0], list):
-                hash_value = self.base64_encode(self._hash_list(hashable))
-            else:
-                hash_value = self.base64_encode(self._hash_list_of_tuple(hashable))
+            hash_value = self.base64_encode(self._hash_list(hashable))
+
         elif isinstance(hashable, str):
             hash_value = self.base64_encode(self._hash_string(hashable))
         elif isinstance(dictionary, dict):
