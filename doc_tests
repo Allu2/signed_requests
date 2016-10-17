@@ -38,8 +38,21 @@ Imports and make a key
     >>> from jwcrypto import jwk
     >>> key = jwk.JWK.generate(kty='oct', size=256)
 
-Form request that gets PoP Authorization header
-    >>> req = requests.Request("GET", "http://localhost/", auth=SignedRequest(token="blaa", key=key))
+Form most basic request that gets PoP Authorization header and check that its there
+    >>> req = requests.Request("GET", "http://localhost/", auth=SignedRequest(token="blaa", key=key), params={"a": "foo", "b": "bar", "c": "duck"})
     >>> req.prepare() # doctest: +ELLIPSIS
     {'Authorization': 'PoP .eyJ...'}
     <PreparedRequest [GET]>
+
+
+
+
+
+This part is just to ease up seeing actual test results via copy&paste
+
+import requests
+from signed_request_auth import SignedRequest
+from jwcrypto import jwk
+key = jwk.JWK.generate(kty='oct', size=256)
+req = requests.get("http://localhost/", auth=SignedRequest(token="blaa", key=key, sign_query=True), params={"a": "foo", "b": "bar", "c": "duck"})
+req.prepare() # doctest: +ELLIPSIS

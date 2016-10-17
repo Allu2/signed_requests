@@ -23,14 +23,22 @@
 #  
 __author__ = "Aleksi Palomäki"
 import time
+import urlparse
 from json import dumps
 from requests.auth import AuthBase
 
 from jwcrypto import jws
 
+from json_builder import hash_params
+
 
 class SignedRequest(AuthBase):
     def generate_authorization_header(self):
+        # print(dumps(self.json_structure, indent=2))
+        """
+        Generates the actual PoP token and the string for Authorization header
+        :return:
+        """
         token = jws.JWS(dumps(self.json_structure).encode("utf-8"))
         token.add_signature(key=self.sign_key, alg=self.alg, header=self.header, protected=self.protected)
         authorization_header = "PoP {}".format(token.serialize(compact=True))
@@ -49,6 +57,20 @@ class SignedRequest(AuthBase):
                  protected=None,
                  header=None):
 
+        """
+
+        :param token:  Token for the "at" field                             (Required)
+        :param sign_method: Do we add method to the signed part?            (Optional)
+        :param sign_url: Do we add url to the signed part?                  (Optional)
+        :param sign_path: Do we add path to the signed part?                (Optional)
+        :param sign_query: Do we add query parameters to the signed part?   (Optional)
+        :param sign_header: Do we add headers to the signed part?           (Optional)
+        :param sign_body: Do we add content of body to the signed part?     (Optional)
+        :param key: JWK used to sign the signed part                        (Required)
+        :param alg: Algorithm used in key (Defaults to HS256)               (Optional)
+        :param protected: Protected field for the signing                   (Optional)
+        :param header: Header part for the signing                          (Optional)
+        """
         if alg is None:
             if protected is None and header is None:
                 header = dumps({"typ": "JWS",
@@ -75,6 +97,27 @@ class SignedRequest(AuthBase):
         }
 
     def __call__(self, r):
-        r.headers['Authorization'] = self.generate_authorization_header()
+        """
+
+        :param r: PreparedRequest object
+        :return: PreparedRequest object
+        """
+        hasher = hash_params()
+        # print(r.__dict__)
+
+        if self.sign_query:
+            params = urlparse.parse_qsl(urlparse.urlparse(r.url).query)
+            # print(params)
+            keys = []
+            for item in params:
+                keys.append(item[0])
+            hash = hasher.hash(params)
+            self.json_structure["q"] = [keys, hash]  # 'q' for query
+        auth_header_has_content = r.headers.get("Authorization", False)
+        if auth_header_has_content:  # TODO: Naive attempt to consider existing stuff in Authorization, I need to read more about requests to know if this could work.
+            r.headers['Authorization'] = "{},{}".format(self.generate_authorization_header(),
+                                                        r.headers['Authorization']).rstrip(",")
+        else:
+            r.headers['Authorization'] = self.generate_authorization_header()
         print(r.headers)
         return r

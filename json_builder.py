@@ -35,7 +35,7 @@ class hash_params:
         """
 
         :param string:  string in query string format to be hashed, for example "a=1&b=2&c=3"
-        :return: binary stream(octet) representation of hashed string
+        :return: byte array(octet stream) representation of hashed string
         """
         sha = hashlib.sha256()
         sha.update(string)
@@ -44,7 +44,8 @@ class hash_params:
     def base64_encode(self, sha_digest):
         """
 
-        :param sha_digest: binary stream(octet) representation of hashed string, we base 64 encode it here
+        :param sha_digest: byte array(octet stream) representation of hashed string, we base 64 encode it here
+        :return: base64url_safe encode of the hash with padding removed.
         """
         return base64.urlsafe_b64encode(sha_digest).replace("=",
                                                             "")  # Note how we remove padding here, apparently everyone does.
@@ -52,8 +53,21 @@ class hash_params:
     def _hash_list(self, param_list):
         """
 
-        :param list: list as [["key", "value], ["key2", "value2"]]
-        :return: binary stream(octet) representation of hashed string
+        :param list: list as [["key", "value"], ["key2", "value2"]]
+        :return: byte array(octet stream) representation of hashed string
+        """
+        string = ""
+        for pair in param_list:
+            string += "{}={}&".format(precent_encode(pair[0]), precent_encode(pair[1]))
+        string = string.rstrip("&")
+        return self._hash_string(string)
+
+    def _hash_list_of_tuple(self,
+                            param_list):  # TODO: If this works as is we can just use the _hash_list for tuples as well.
+        """
+
+        :param list: list as [("key", "value"), ("key2", "value2")]
+        :return: byte array(octet stream) representation of hashed string
         """
         string = ""
         for pair in param_list:
@@ -66,7 +80,7 @@ class hash_params:
 
         :param list: list of keys as ["key1", "key2"]
         :param dict: dict as  {"key", "value}
-        :return: binary stream(octet) representation of hashed string
+        :return: byte array(octet stream) representation of hashed string
         """
         string = ""
         for key in list:
@@ -81,7 +95,10 @@ class hash_params:
         :param hashable:
         """
         if isinstance(hashable, list) and dictionary is None:
-            hash_value = self.base64_encode(self._hash_list(hashable))
+            if isinstance(hashable[0], list):
+                hash_value = self.base64_encode(self._hash_list(hashable))
+            else:
+                hash_value = self.base64_encode(self._hash_list_of_tuple(hashable))
         elif isinstance(hashable, str):
             hash_value = self.base64_encode(self._hash_string(hashable))
         elif isinstance(dictionary, dict):
