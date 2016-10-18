@@ -93,5 +93,7 @@ class hash_params:
         elif isinstance(dictionary, dict):
             hash_value = self.base64_encode(self._hash_list_and_dict(hashable, dictionary))
         else:
-            raise TypeError("Invalid type, only hash(hashable) supports only string, dict and list ")
+            raise TypeError("Invalid type, hash(hashable) supports only string('a=1&b=2'), "
+                            "list of [key, value] or (key, value) pairs, "
+                            "dict and list ([key1,key2], {key2: value, key1: value}")
         return hash_value
