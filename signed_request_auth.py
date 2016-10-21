@@ -99,6 +99,7 @@ class SignedRequest(AuthBase):
             "at": token,  # Required
             "ts": time.time()  # Optional but Recommended.
         }
+        self.auth_hdr = ""
 
     def __call__(self, r):
         """
@@ -123,5 +124,5 @@ class SignedRequest(AuthBase):
                                                         r.headers['Authorization']).rstrip(",")
         else:
             r.headers['Authorization'] = self.generate_authorization_header()
-        print(r.headers)
+        self.auth_hdr = (r.headers)
         return r

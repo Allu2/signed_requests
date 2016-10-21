@@ -29,7 +29,7 @@ __author__ = "Aleksi Palomäki"
 import base64
 import hashlib
 from urllib import quote_plus as precent_encode
-
+from jwcrypto import jws
 
 class hash_params:
     def __init__(self):
@@ -97,3 +97,20 @@ class hash_params:
                             "list of [key, value] or (key, value) pairs, "
                             "dict and list ([key1,key2], {key2: value, key1: value}")
         return hash_value
+
+
+class pop_handler:
+    def __init__(self, token, key=None, alg=None):
+        if alg is None:
+            alg = "HS256"
+        self.verified = False
+        self.key = key
+        self.jws_token = jws.JWS()
+        self.jws_token.deserialize(token, key=key, alg=alg)
+        self.decrypted = self.jws_token.payload
+        if key is not None:
+            self.verified = True
+
+    def get_at(self):
+        return self.decrypted
+
