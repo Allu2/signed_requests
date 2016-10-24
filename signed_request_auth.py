@@ -99,7 +99,7 @@ class SignedRequest(AuthBase):
             "at": token,  # Required
             "ts": time.time()  # Optional but Recommended.
         }
-        self.auth_hdr = ""
+
 
     def __call__(self, r):
         """
@@ -118,11 +118,14 @@ class SignedRequest(AuthBase):
                 keys.append(item[0])
             hash = hasher.hash(params)
             self.json_structure["q"] = [keys, hash]  # 'q' for query
+        if self.sign_method:
+            self.json_structure["m"] = r.method
+        if self.sign_path:
+            self.json_structure["p"] = urlparse.urlparse(r.url).path
         auth_header_has_content = r.headers.get("Authorization", False)
         if auth_header_has_content:  # TODO: Naive attempt to consider existing stuff in Authorization, I need to read more about requests to know if this could work.
             r.headers['Authorization'] = "{},{}".format(self.generate_authorization_header(),
                                                         r.headers['Authorization']).rstrip(",")
         else:
             r.headers['Authorization'] = self.generate_authorization_header()
-        self.auth_hdr = (r.headers)
         return r

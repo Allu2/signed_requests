@@ -7,6 +7,7 @@
 #
 # Copyright (c) 2016 Aleksi Palomäki
 #
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -31,9 +32,14 @@ import hashlib
 from urllib import quote_plus as precent_encode
 from jwcrypto import jws
 
-class hash_params:
-    def __init__(self):
-        pass
+class base_hash:
+    def base64_encode(self, sha_digest):
+        """
+
+        :param sha_digest: byte array(octet stream) representation of hashed string, we base 64 encode it here
+        :return: base64url_safe encode of the hash with padding removed.
+        """
+        return base64.urlsafe_b64encode(sha_digest).replace("=", "")  # Note how we remove padding here, apparently everyone does.
 
     def _hash_string(self, string):
         """
@@ -45,14 +51,7 @@ class hash_params:
         sha.update(string)
         return sha.digest()
 
-    def base64_encode(self, sha_digest):
-        """
-
-        :param sha_digest: byte array(octet stream) representation of hashed string, we base 64 encode it here
-        :return: base64url_safe encode of the hash with padding removed.
-        """
-        return base64.urlsafe_b64encode(sha_digest).replace("=",
-                                                            "")  # Note how we remove padding here, apparently everyone does.
+class hash_params(base_hash):
 
     def _hash_list(self, param_list):
         """
@@ -97,6 +96,24 @@ class hash_params:
                             "list of [key, value] or (key, value) pairs, "
                             "dict and list ([key1,key2], {key2: value, key1: value}")
         return hash_value
+
+class hash_headers(base_hash):
+    def __init__(self):
+        pass
+
+
+    def _hash_list_and_dict(self, list, dict):
+        """
+
+        :param list: list of keys as ["key1", "key2"]
+        :param dict: dict as  {"key", "value}
+        :return: byte array(octet stream) representation of hashed string
+        """
+        string = ""
+        for key in list:
+            string += "{}={}&".format(precent_encode(key), precent_encode(dict[key]))
+        string = string.rstrip("&")
+        return self._hash_string(string)
 
 
 class pop_handler:
