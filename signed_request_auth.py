@@ -77,7 +77,7 @@ class SignedRequest(AuthBase):
         """
         if alg is None:
             if protected is None and header is None:
-                header = dumps({"typ": "JWS",
+                protected = dumps({"typ": "JWS",
                                 "alg": "HS256"})
 
         self.sign_method = sign_method
