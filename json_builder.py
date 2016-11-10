@@ -118,15 +118,18 @@ class hash_headers(base_hash):
 
 class pop_handler:
     def __init__(self, token, key=None, alg=None):
-        if alg is None:
-            alg = "HS256"
+        #if alg is None:
+        #    alg = "HS256"
         self.verified = False
         self.key = key
         self.jws_token = jws.JWS()
         self.jws_token.deserialize(token, key=key, alg=alg)
-        self.decrypted = self.jws_token.payload
-        if key is not None:
+        try:
+            self.decrypted = self.jws_token.payload
             self.verified = True
+        except Exception as e:
+            self.decrypted = self.jws_token.__dict__["objects"]["payload"]
+            self.verified = False
 
     def get_at(self):
         return self.decrypted
