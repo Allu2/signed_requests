@@ -131,6 +131,6 @@ class pop_handler:
             self.decrypted = self.jws_token.__dict__["objects"]["payload"]
             self.verified = False
 
-    def get_at(self):
+    def get_decoded_token(self):
         return self.decrypted
 

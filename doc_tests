@@ -72,7 +72,7 @@ Import pop_handler and test generated pop with it.
     >>> from json_builder import pop_handler
     >>> token = header.split(" ")[1]
     >>> poppi = pop_handler(token=token, key=key)
-    >>> poppi.get_at() # doctest: +ELLIPSIS
+    >>> poppi.get_decoded_token() # doctest: +ELLIPSIS
     '{"q": [["a", "c", "b"], "A7zM9tEc3J__xtM6rPf7veMqpehXtSoD3tJMS2OUDTs"], "at": "blaa", "ts": ...}'
 
 
@@ -90,4 +90,4 @@ header = req.__dict__["auth"].generate_authorization_header()
 from json_builder import pop_handler
 token = header.split(" ")[1]
 poppi = pop_handler(token=token, key=key)
-poppi.get_at()
+poppi.get_decoded_token()
